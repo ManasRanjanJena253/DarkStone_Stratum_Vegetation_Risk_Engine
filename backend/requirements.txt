@@ -1,0 +1,13 @@
+fastapi
+sqlalchemy[asyncio]
+asyncpg
+python-dotenv
+pydantic[email]
+uvicorn
+celery
+pydantic-settings
+redis
+flower    # For monitoring celery work
+scikit-learn
+numpy
+pandas
