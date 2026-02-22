@@ -1,0 +1,65 @@
+services:
+  api:
+    build: .
+    container_name: core_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - core_network
+
+  worker:
+    build: .
+    container_name: core_celery_worker
+    command: celery -A worker.celery_app worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+    networks:
+      - core_network
+
+  db:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: core_postgis
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-vegetation_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - core_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: core_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - core_network
+
+volumes:
+  postgres_data:
+
+networks:
+  core_network:
+    driver: bridge
