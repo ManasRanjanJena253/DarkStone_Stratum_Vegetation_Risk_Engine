@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   api:
     build: .
@@ -9,7 +11,9 @@ services:
     env_file:
       - .env
     depends_on:
-      db:
+      user_db:
+        condition: service_healthy
+      analysis_db:
         condition: service_healthy
       redis:
         condition: service_started
@@ -26,23 +30,43 @@ services:
       - .env
     depends_on:
       - redis
-      - db
+      - user_db
+      - analysis_db
     networks:
       - core_network
 
-  db:
-    image: postgis/postgis:15-3.3-alpine
-    container_name: core_postgis
+  user_db:
+    image: postgres:15-alpine
+    container_name: core_user_db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-vegetation_db}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: user_db
+      POSTGRES_DB: user_db
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - user_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - core_network
+
+  analysis_db:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: core_analysis_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: analysis_db
+      POSTGRES_DB: analysis_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - analysis_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -58,7 +82,8 @@ services:
       - core_network
 
 volumes:
-  postgres_data:
+  user_postgres_data:
+  analysis_postgres_data:
 
 networks:
   core_network:

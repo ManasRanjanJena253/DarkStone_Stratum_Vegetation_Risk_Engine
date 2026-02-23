@@ -11,3 +11,4 @@ flower    # For monitoring celery work
 scikit-learn
 numpy
 pandas
+alembic
