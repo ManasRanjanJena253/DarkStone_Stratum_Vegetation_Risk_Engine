@@ -28,9 +28,9 @@ class UserCreated(BaseModel):   # Don't need to inherit from UserBase as it does
 
     model_config = {"from_attributes": True}
 
-class UserLogin(UserBase):
+class UserLoginInput(UserBase):
     user_id : str
-    session_id : str  # To be stored in redis for that particular session of the user.
+    password : str
 
     model_config = {"from_attributes": True}   # This is needed for each pydantic class which validates ORM form of data, otherwise it will through error.
 

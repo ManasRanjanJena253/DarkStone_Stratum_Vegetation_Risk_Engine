@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from ..core.config import settings
+import redis.asyncio as redis
 
 # Creating the async engines
 user_engine = create_async_engine(
@@ -41,3 +42,10 @@ async def get_analysis_db():
         except Exception:
             await session.rollback()
             raise
+
+async def get_redis():
+    client = redis.from_url(settings.celery_url)
+    try:
+        yield client
+    finally:
+        await client.aclose()
