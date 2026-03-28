@@ -8,6 +8,7 @@ class User(UserBase):
     user_id = Column(String, primary_key = True, index = True)
     email = Column(String, unique = True, index = True)
     hashed_pwd = Column(String)
+    role = Column(String, nullable=True)
     organization_name = Column(String, index = True)
     is_organization = Column(Boolean, index = True)
     is_active = Column(Boolean, default = True)

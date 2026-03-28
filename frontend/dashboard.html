@@ -158,6 +158,13 @@
       const savedSession = localStorage.getItem('dss-session');
       if (savedSession) {
         sessionId = savedSession;
+        fetch(`${API_BASE}/../../me?session_id=${sessionId}`)
+    .then(res => res.json())
+    .then(profile => {
+      currentUser = profile;
+      applyUserToDashboard(profile);
+    })
+    .catch(err => console.error("Failed to load profile:", err));
       }
 
       // Init map after a short delay to allow layout to settle

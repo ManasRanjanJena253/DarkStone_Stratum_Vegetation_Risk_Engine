@@ -326,11 +326,11 @@ docker compose down -v
 
 ## Collaborators
 
-| Name | Role | GitHub |
-|------|------|--------|
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Name              | Role                                  | GitHub |
+|-------------------|---------------------------------------|--------|
+| Daksh Garg        |  |  |
+| Aman Singh        |                                       |  |
+| Manas Ranjan Jena |      Backend and Machine Learning Engineer                                 | https://github.com/ManasRanjanJena253 |
 
 ---
 

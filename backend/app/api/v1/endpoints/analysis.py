@@ -39,7 +39,7 @@ async def create_sector(
         sector_id=str(uuid4()),
         sector_name=payload.sector_name,
         geometry=geom,
-        metadata=payload.metadata or {},
+        sector_metadata=payload.metadata or {},
     )
     db.add(sector)
     await db.commit()

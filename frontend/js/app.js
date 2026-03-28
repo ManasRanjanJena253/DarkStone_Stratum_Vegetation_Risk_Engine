@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000/api/v1';
+const API_BASE = '/api/v1';
 
 // ─── APP STATE ───
 let currentUser = null;
@@ -92,14 +92,8 @@ async function handleLogin() {
     sessionId = data.session_id;
     localStorage.setItem('dss-session', sessionId);
 
-    const profileRes = await fetch(`${API_BASE}/../../me?session_id=${sessionId}`);
-    const profile = await profileRes.json();
-    currentUser = profile;
-    isDemoMode = false;
-
-    applyUserToDashboard(profile);
+    isDemoMode=false;
     showPage('dashboard');
-    loadDashboardData();
   } catch (err) {
     showAuthAlert(err.message, 'error');
   }
@@ -146,7 +140,7 @@ async function handleLogout() {
 }
 
 function applyUserToDashboard(user) {
-  const name = user.company_name || user.email || 'User';
+  const name = user.organization_name || user.email || 'User';
   document.getElementById('dash-avatar').textContent = name.charAt(0).toUpperCase();
   document.getElementById('dash-company').textContent = name;
   document.getElementById('dash-plan').textContent = user.subscription_plan || 'Free';

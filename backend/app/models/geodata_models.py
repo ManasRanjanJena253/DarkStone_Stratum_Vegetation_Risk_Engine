@@ -16,7 +16,7 @@ class PowerlineSegment(AnalysisBase):
     voltage_kv = Column(Float, nullable=True)
     company_name = Column(String, nullable=True)
     geometry = Column(Geometry(geometry_type="LINESTRING", srid=4326), nullable=False)
-    metadata = Column(JSONB, default={})
+    segment_metadata = Column(JSONB, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (
@@ -32,7 +32,7 @@ class ForestPolygon(AnalysisBase):
     density = Column(String, default="medium")
     area_hectares = Column(Float, nullable=True)
     geometry = Column(Geometry(geometry_type="POLYGON", srid=4326), nullable=False)
-    metadata = Column(JSONB, default={})
+    forest_metadata = Column(JSONB, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (

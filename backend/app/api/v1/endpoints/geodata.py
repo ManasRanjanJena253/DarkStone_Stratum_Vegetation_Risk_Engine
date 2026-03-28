@@ -50,9 +50,9 @@ async def upload_powerline(
         user_id=user.user_id,
         name=payload.name,
         voltage_kv=payload.voltage_kv,
-        company_name=payload.company_name or user.company_name,
+        company_name=payload.company_name or user.organization_name,
         geometry=geom,
-        metadata=payload.metadata or {},
+        segment_metadata=payload.metadata or {},
     )
     db.add(seg)
     await db.commit()

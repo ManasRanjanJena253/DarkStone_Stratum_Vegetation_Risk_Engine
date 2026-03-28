@@ -83,7 +83,6 @@ class UserProfileResponse(BaseModel):
     model_config = {"from_attributes": True}
     user_id: str
     email: EmailStr
-    company_name: Optional[str]
     role: Optional[str]
     organization_name: Optional[str]
     is_organization: Optional[bool]

@@ -49,7 +49,7 @@ async def register(user: CreateUser, db: AsyncSession = Depends(get_user_db)):
         user_id=str(uuid4()),
         email=user.email,
         hashed_pwd=hashpw(user.password.encode(), salt).decode("utf-8"),
-        company_name=user.company_name,
+        organization_name=user.company_name,
         role=user.role,
     )
     db.add(new_user)
