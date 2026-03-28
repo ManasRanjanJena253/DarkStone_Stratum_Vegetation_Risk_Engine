@@ -15,6 +15,7 @@ alembic
 bcrypt
 geoalchemy2
 shapely
+pyproj
 rasterio
 httpx
 python-jose[cryptography]

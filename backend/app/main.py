@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from uuid import uuid4
@@ -21,6 +22,15 @@ from .api.v1.api import api_router
 stripe.api_key = settings.stripe_secret_key
 
 app = FastAPI(title="DarkStone Stratum Vegetation Risk Engine")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(api_router)
 
 
@@ -39,6 +49,8 @@ async def register(user: CreateUser, db: AsyncSession = Depends(get_user_db)):
         user_id=str(uuid4()),
         email=user.email,
         hashed_pwd=hashpw(user.password.encode(), salt).decode("utf-8"),
+        company_name=user.company_name,
+        role=user.role,
     )
     db.add(new_user)
     await db.commit()

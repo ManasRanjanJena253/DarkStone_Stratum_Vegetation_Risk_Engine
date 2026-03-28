@@ -1,14 +1,9 @@
-// =============================================
-//  DARK STONE STRATUM — Frontend Application
-//  API Base URL (adjust for production)
-// =============================================
-
 const API_BASE = 'http://localhost:8000/api/v1';
 
 // ─── APP STATE ───
 let currentUser = null;
 let sessionId = null;
-let isDemoMode = false; // BYPASS MODE LOGIC
+let isDemoMode = false;
 let mapInitialized = false;
 let leafletMap = null;
 let powerlineLayer, forestLayer, hazardLayer;
@@ -35,7 +30,6 @@ function setTheme(theme) {
   } else {
     icon.textContent = '🌙'; label.textContent = 'Dark';
   }
-  // Update Leaflet tile layer if map exists
   if (leafletMap) updateMapTiles(theme);
 }
 
@@ -56,20 +50,14 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   window.scrollTo(0, 0);
-
   if (name === 'dashboard') {
-    setTimeout(() => {
-      if (!mapInitialized) { initMap(); }
-    }, 100);
+    setTimeout(() => { if (!mapInitialized) { initMap(); } }, 100);
   }
 }
 
 function navigateBack() {
-  if (currentUser || isDemoMode) {
-    showPage('dashboard');
-  } else {
-    showPage('home');
-  }
+  if (currentUser || isDemoMode) showPage('dashboard');
+  else showPage('home');
 }
 
 // ─── AUTH TAB TOGGLE ───
@@ -104,7 +92,6 @@ async function handleLogin() {
     sessionId = data.session_id;
     localStorage.setItem('dss-session', sessionId);
 
-    // Fetch user profile
     const profileRes = await fetch(`${API_BASE}/../../me?session_id=${sessionId}`);
     const profile = await profileRes.json();
     currentUser = profile;
@@ -127,13 +114,12 @@ async function handleSignup() {
 
   if (!company || !role || !email || !password) { showAuthAlert('Please fill in all fields.', 'error'); return; }
   if (password.length < 6) { showAuthAlert('Password must be at least 6 characters.', 'error'); return; }
-  if (!email.includes('@')) { showAuthAlert('Please enter a valid email address.', 'error'); return; }
 
   try {
     const res = await fetch(`${API_BASE}/../../register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password, company_name: company, role })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Registration failed');
@@ -149,14 +135,13 @@ async function handleSignup() {
 async function handleLogout() {
   const sid = sessionId || localStorage.getItem('dss-session');
   if (sid && !isDemoMode) {
-    try {
-      await fetch(`${API_BASE}/../../logout?session_id=${sid}`, { method: 'POST' });
-    } catch (e) {}
+    try { await fetch(`${API_BASE}/../../logout?session_id=${sid}`, { method: 'POST' }); } catch (e) {}
   }
   currentUser = null;
   sessionId = null;
   isDemoMode = false;
   localStorage.removeItem('dss-session');
+  localStorage.removeItem('dss-demo-mode');
   showPage('home');
 }
 
@@ -169,11 +154,7 @@ function applyUserToDashboard(user) {
   document.getElementById('dash-subtitle').textContent = `Real-time wildfire hazard analysis for ${name}`;
 }
 
-// ══════════════════════════════════════════════════════
-//  BYPASS MODE LOGIC - TEMP DEMO CODE - REMOVE LATER
-//  Remove the bypassToDemo() function and all calls to it
-//  when switching to production authentication.
-// ══════════════════════════════════════════════════════
+// ─── DEMO BYPASS ───
 function bypassToDemo() {
   isDemoMode = true;
   currentUser = null;
@@ -182,23 +163,18 @@ function bypassToDemo() {
   document.getElementById('dash-plan').textContent = 'Pro';
   document.getElementById('dash-plan').className = 'company-plan plan-Pro';
   document.getElementById('dash-subtitle').textContent = 'Demo mode — Mock data loaded';
-  document.getElementById('demo-banner').style.display = 'flex';
+  const banner = document.getElementById('demo-banner');
+  if (banner) banner.style.display = 'flex';
   showPage('dashboard');
   loadDemoData();
 }
-// END BYPASS MODE LOGIC
 
 // ─── SUBSCRIPTION ───
 async function selectPlan(plan) {
-  if (!currentUser && !isDemoMode) {
-    showPage('auth');
-    return;
-  }
-  if (isDemoMode) {
-    alert('Please create an account to subscribe!');
-    showPage('auth');
-    return;
-  }
+  if (!currentUser && !isDemoMode) { showPage('auth'); return; }
+  if (isDemoMode) { alert('Please create an account to subscribe!'); showPage('auth'); return; }
+  if (plan === 'Free') { alert('You are already on the Free plan.'); return; }
+
   try {
     const sid = sessionId || localStorage.getItem('dss-session');
     const res = await fetch(`${API_BASE}/../../payments/create-checkout?session_id=${sid}`, {
@@ -217,161 +193,47 @@ function contactEnterprise() {
   window.location.href = 'mailto:enterprise@darkstonestratum.com?subject=Enterprise Plan Inquiry';
 }
 
-function showDashSection(sec) { /* future routing */ }
+function showDashSection(sec) {}
 
 // ════════════════════════════════════════════════════
-//  DEMO DATA START
-//  This section contains all mock data for demo mode.
-//  Remove this entire block when using real API data.
+// DEMO DATA
 // ════════════════════════════════════════════════════
 
-// India-based forest regions (realistic coordinates)
 const DEMO_FORESTS = [
-  {
-    name: "Sundarbans Reserve Forest",
-    density: "high",
-    areaHectares: 102000,
-    geometry: {
-      type: "Polygon",
-      coordinates: [[[88.8,21.9],[89.2,21.9],[89.2,22.4],[88.8,22.4],[88.8,21.9]]]
-    }
-  },
-  {
-    name: "Western Ghats Forest Belt",
-    density: "high",
-    areaHectares: 56000,
-    geometry: {
-      type: "Polygon",
-      coordinates: [[[76.1,11.5],[76.6,11.5],[76.6,12.1],[76.1,12.1],[76.1,11.5]]]
-    }
-  },
-  {
-    name: "Corbett National Park Buffer",
-    density: "medium",
-    areaHectares: 31200,
-    geometry: {
-      type: "Polygon",
-      coordinates: [[[78.7,29.4],[79.3,29.4],[79.3,29.9],[78.7,29.9],[78.7,29.4]]]
-    }
-  },
-  {
-    name: "Satpura Forest Reserve",
-    density: "medium",
-    areaHectares: 28900,
-    geometry: {
-      type: "Polygon",
-      coordinates: [[[77.5,22.2],[78.2,22.2],[78.2,22.7],[77.5,22.7],[77.5,22.2]]]
-    }
-  },
-  {
-    name: "Kanha Tiger Reserve Edge",
-    density: "high",
-    areaHectares: 19500,
-    geometry: {
-      type: "Polygon",
-      coordinates: [[[80.5,22.1],[81.0,22.1],[81.0,22.5],[80.5,22.5],[80.5,22.1]]]
-    }
-  },
-  {
-    name: "Rajasthan Sparse Scrublands",
-    density: "low",
-    areaHectares: 9800,
-    geometry: {
-      type: "Polygon",
-      coordinates: [[[73.5,26.0],[74.2,26.0],[74.2,26.5],[73.5,26.5],[73.5,26.0]]]
-    }
-  }
+  { name: "Sundarbans Reserve Forest",    density: "high",   areaHectares: 102000, geometry: { type: "Polygon", coordinates: [[[88.8,21.9],[89.2,21.9],[89.2,22.4],[88.8,22.4],[88.8,21.9]]] } },
+  { name: "Western Ghats Forest Belt",    density: "high",   areaHectares: 56000,  geometry: { type: "Polygon", coordinates: [[[76.1,11.5],[76.6,11.5],[76.6,12.1],[76.1,12.1],[76.1,11.5]]] } },
+  { name: "Corbett National Park Buffer", density: "medium", areaHectares: 31200,  geometry: { type: "Polygon", coordinates: [[[78.7,29.4],[79.3,29.4],[79.3,29.9],[78.7,29.9],[78.7,29.4]]] } },
+  { name: "Satpura Forest Reserve",       density: "medium", areaHectares: 28900,  geometry: { type: "Polygon", coordinates: [[[77.5,22.2],[78.2,22.2],[78.2,22.7],[77.5,22.7],[77.5,22.2]]] } },
+  { name: "Kanha Tiger Reserve Edge",     density: "high",   areaHectares: 19500,  geometry: { type: "Polygon", coordinates: [[[80.5,22.1],[81.0,22.1],[81.0,22.5],[80.5,22.5],[80.5,22.1]]] } },
+  { name: "Rajasthan Sparse Scrublands",  density: "low",    areaHectares: 9800,   geometry: { type: "Polygon", coordinates: [[[73.5,26.0],[74.2,26.0],[74.2,26.5],[73.5,26.5],[73.5,26.0]]] } },
 ];
 
-// Company powerline data (fictional utility: IndraGrid Power Ltd)
 const DEMO_POWERLINES = [
-  {
-    name: "IndraGrid 765kV Trunk Line Alpha",
-    voltageKV: 765,
-    companyName: "IndraGrid Power Ltd",
-    geometry: {
-      type: "LineString",
-      coordinates: [[88.6,21.7],[89.0,22.1],[89.3,22.6]]
-    }
-  },
-  {
-    name: "IndraGrid 400kV Western Spine",
-    voltageKV: 400,
-    companyName: "IndraGrid Power Ltd",
-    geometry: {
-      type: "LineString",
-      coordinates: [[75.8,11.3],[76.3,11.7],[76.7,12.3]]
-    }
-  },
-  {
-    name: "IndraGrid 220kV Corbett Feeder",
-    voltageKV: 220,
-    companyName: "IndraGrid Power Ltd",
-    geometry: {
-      type: "LineString",
-      coordinates: [[78.5,29.2],[79.0,29.6],[79.5,30.1]]
-    }
-  },
-  {
-    name: "IndraGrid 132kV Central Link",
-    voltageKV: 132,
-    companyName: "IndraGrid Power Ltd",
-    geometry: {
-      type: "LineString",
-      coordinates: [[77.3,22.0],[77.9,22.4],[78.4,22.8]]
-    }
-  },
-  {
-    name: "IndraGrid 400kV Kanha Corridor",
-    voltageKV: 400,
-    companyName: "IndraGrid Power Ltd",
-    geometry: {
-      type: "LineString",
-      coordinates: [[80.3,21.9],[80.7,22.3],[81.2,22.6]]
-    }
-  },
-  {
-    name: "IndraGrid 66kV Rajasthan Desert Link",
-    voltageKV: 66,
-    companyName: "IndraGrid Power Ltd",
-    geometry: {
-      type: "LineString",
-      coordinates: [[73.3,25.8],[73.8,26.2],[74.4,26.7]]
-    }
-  }
+  { name: "IndraGrid 765kV Trunk Line Alpha",     voltageKV: 765, companyName: "IndraGrid Power Ltd", geometry: { type: "LineString", coordinates: [[88.6,21.7],[89.0,22.1],[89.3,22.6]] } },
+  { name: "IndraGrid 400kV Western Spine",        voltageKV: 400, companyName: "IndraGrid Power Ltd", geometry: { type: "LineString", coordinates: [[75.8,11.3],[76.3,11.7],[76.7,12.3]] } },
+  { name: "IndraGrid 220kV Corbett Feeder",       voltageKV: 220, companyName: "IndraGrid Power Ltd", geometry: { type: "LineString", coordinates: [[78.5,29.2],[79.0,29.6],[79.5,30.1]] } },
+  { name: "IndraGrid 132kV Central Link",         voltageKV: 132, companyName: "IndraGrid Power Ltd", geometry: { type: "LineString", coordinates: [[77.3,22.0],[77.9,22.4],[78.4,22.8]] } },
+  { name: "IndraGrid 400kV Kanha Corridor",       voltageKV: 400, companyName: "IndraGrid Power Ltd", geometry: { type: "LineString", coordinates: [[80.3,21.9],[80.7,22.3],[81.2,22.6]] } },
+  { name: "IndraGrid 66kV Rajasthan Desert Link",  voltageKV: 66,  companyName: "IndraGrid Power Ltd", geometry: { type: "LineString", coordinates: [[73.3,25.8],[73.8,26.2],[74.4,26.7]] } },
 ];
 
-// Compute hazards from demo data (frontend geospatial logic)
 function computeDemoHazards(powerlines, forests) {
   const hazards = [];
   powerlines.forEach(pl => {
     forests.forEach(forest => {
       const dist = minDistanceLineToPolygon(pl.geometry.coordinates, forest.geometry.coordinates[0]);
       let riskLevel, bufferRadiusM;
-      if (dist < 0.03) { // ~3km at Indian lat
-        riskLevel = 'high'; bufferRadiusM = 300;
-      } else if (dist < 0.06) {
-        riskLevel = 'medium'; bufferRadiusM = 600;
-      } else if (dist < 0.10) {
-        riskLevel = 'low'; bufferRadiusM = 1000;
-      } else {
-        return;
-      }
-      // Create a simple buffer polygon around closest segment midpoint
-      const midCoord = pl.geometry.coordinates[Math.floor(pl.geometry.coordinates.length/2)];
+      if (dist < 0.03)       { riskLevel = 'high';   bufferRadiusM = 300; }
+      else if (dist < 0.06)  { riskLevel = 'medium'; bufferRadiusM = 600; }
+      else if (dist < 0.10)  { riskLevel = 'low';    bufferRadiusM = 1000; }
+      else return;
+      const midCoord = pl.geometry.coordinates[Math.floor(pl.geometry.coordinates.length / 2)];
       const bufDeg = bufferRadiusM / 111000;
       hazards.push({
-        powerlineName: pl.name,
-        forestName: forest.name,
-        forestDensity: forest.density,
-        riskLevel,
-        distanceToForestM: Math.round(dist * 111000),
-        bufferRadiusM,
+        powerlineName: pl.name, forestName: forest.name, forestDensity: forest.density,
+        riskLevel, distanceToForestM: Math.round(dist * 111000), bufferRadiusM,
         areaM2: Math.round(Math.PI * bufferRadiusM * bufferRadiusM),
-        geometry: {
-          type: "Polygon",
-          coordinates: [createCirclePolygon(midCoord[0], midCoord[1], bufDeg, 16)]
-        }
+        geometry: { type: "Polygon", coordinates: [createCirclePolygon(midCoord[0], midCoord[1], bufDeg, 16)] }
       });
     });
   });
@@ -401,58 +263,59 @@ function createCirclePolygon(cx, cy, r, n) {
 function loadDemoData() {
   const hazards = computeDemoHazards(DEMO_POWERLINES, DEMO_FORESTS);
   renderAll(DEMO_POWERLINES, DEMO_FORESTS, hazards);
-  document.getElementById('stat-powerlines').textContent = DEMO_POWERLINES.length;
-  document.getElementById('stat-forests').textContent = DEMO_FORESTS.length;
+  const elP = document.getElementById('stat-powerlines');
+  const elF = document.getElementById('stat-forests');
+  if (elP) elP.textContent = DEMO_POWERLINES.length;
+  if (elF) elF.textContent = DEMO_FORESTS.length;
 }
 
-// DEMO DATA END
+// ════════════════════════════════════════════════════
+// REAL API DATA
 // ════════════════════════════════════════════════════
 
-// ─── LOAD REAL DATA FROM API ───
 async function loadDashboardData() {
   const loading = document.getElementById('map-loading');
   if (loading) loading.classList.remove('hidden');
 
   try {
     const sid = sessionId || localStorage.getItem('dss-session');
+    if (!sid) { loadDemoData(); return; }
 
-    // Fetch vegetation records (used as forest/sector data)
-    // Using search endpoint to get records by sector
-    const recordsRes = await fetch(`${API_BASE}/search?limit=100`, {
-      headers: { 'session_id': sid || '' }
-    });
+    const res = await fetch(`${API_BASE}/geodata/dashboard?session_id=${sid}`);
+    if (!res.ok) throw new Error(`Geodata fetch failed: ${res.status}`);
+    const data = await res.json();
 
-    let records = [];
-    if (recordsRes.ok) {
-      const recordsData = await recordsRes.json();
-      records = recordsData.results || [];
-    }
+    const powerlines = (data.powerlines || []).map(p => ({
+      name: p.name, voltageKV: p.voltageKV, companyName: p.companyName, geometry: p.geometry,
+    }));
+    const forests = (data.forests || []).map(f => ({
+      name: f.name, density: f.density, areaHectares: f.areaHectares, geometry: f.geometry,
+    }));
+    const hazards = (data.hazards || []).map(h => ({
+      powerlineName: h.powerlineName, forestName: h.forestName, forestDensity: h.forestDensity,
+      riskLevel: h.riskLevel, distanceToForestM: h.distanceToForestM,
+      bufferRadiusM: h.bufferRadiusM, areaM2: h.areaM2, geometry: h.geometry,
+    }));
 
-    // For now, render with demo data as fallback since we need
-    // geospatial forest/powerline data from sectors
-    // The API integration connects to analysis jobs and sectors
-    renderAll(DEMO_POWERLINES, DEMO_FORESTS, computeDemoHazards(DEMO_POWERLINES, DEMO_FORESTS));
+    const stats = data.stats || {};
+    const elP = document.getElementById('stat-powerlines');
+    const elF = document.getElementById('stat-forests');
+    if (elP) elP.textContent = stats.powerlines ?? powerlines.length;
+    if (elF) elF.textContent = stats.forests ?? forests.length;
 
-    // Update stats with real data if available
-    if (records.length > 0) {
-      const high = records.filter(r => r.risk_label === 'Critical' || r.risk_label === 'High').length;
-      const med = records.filter(r => r.risk_label === 'Medium').length;
-      const low = records.filter(r => r.risk_label === 'Low').length;
-      document.getElementById('stat-high').textContent = high;
-      document.getElementById('stat-medium').textContent = med;
-      document.getElementById('stat-low').textContent = low;
-    }
+    // Fall back to demo data if user has no powerlines uploaded yet
+    if (powerlines.length === 0) loadDemoData();
+    else renderAll(powerlines, forests, hazards);
 
   } catch (err) {
     console.error('Failed to load dashboard data:', err);
-    // Fallback to demo data
     loadDemoData();
   } finally {
     if (loading) loading.classList.add('hidden');
   }
 }
 
-// ─── REFRESH HAZARDS (API + demo fallback) ───
+// ─── REFRESH HAZARDS ───
 async function refreshHazards() {
   const btn = document.querySelector('.btn-refresh');
   const loading = document.getElementById('map-loading');
@@ -463,11 +326,13 @@ async function refreshHazards() {
 
   try {
     if (isDemoMode) {
-      // BYPASS MODE LOGIC - TEMP DEMO CODE - REMOVE LATER
-      await new Promise(r => setTimeout(r, 800)); // Simulate delay
+      await new Promise(r => setTimeout(r, 800));
       loadDemoData();
-      // END BYPASS MODE LOGIC
     } else {
+      const sid = sessionId || localStorage.getItem('dss-session');
+      if (sid) {
+        await fetch(`${API_BASE}/geodata/hazards/recompute?session_id=${sid}`, { method: 'POST' });
+      }
       await loadDashboardData();
     }
     if (lastComputed) lastComputed.textContent = `Last computed: ${new Date().toLocaleTimeString()}`;
@@ -483,9 +348,7 @@ async function refreshHazards() {
 async function createSector(payload) {
   const sid = sessionId || localStorage.getItem('dss-session');
   const res = await fetch(`${API_BASE}/analysis/sectors?session_id=${sid}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
   });
   return res.json();
 }
@@ -493,8 +356,7 @@ async function createSector(payload) {
 async function submitAnalysisJob(sectorId) {
   const sid = sessionId || localStorage.getItem('dss-session');
   const res = await fetch(`${API_BASE}/analysis/jobs?session_id=${sid}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sector_id: sectorId })
   });
   return res.json();
@@ -519,14 +381,21 @@ async function searchRecords(params) {
 async function syncFieldUpdates(records) {
   const sid = sessionId || localStorage.getItem('dss-session');
   const res = await fetch(`${API_BASE}/sync?session_id=${sid}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ records })
   });
   return res.json();
 }
 
-// ─── MAP INIT ───
+async function uploadPowerline(payload) {
+  const sid = sessionId || localStorage.getItem('dss-session');
+  const res = await fetch(`${API_BASE}/geodata/powerlines?session_id=${sid}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+  });
+  return res.json();
+}
+
+// ─── MAP ───
 const RISK_COLORS = {
   high:   { fill: '#d94040', stroke: '#bf3030', opacity: 0.32 },
   medium: { fill: '#d97020', stroke: '#bf6010', opacity: 0.28 },
@@ -539,29 +408,18 @@ const DENSITY_COLORS = {
 };
 
 function toLatLng(coord) { return [coord[1], coord[0]]; }
-function coordsToLatLngs(coords) {
-  if (!coords || !coords.length) return [];
-  if (Array.isArray(coords[0][0])) return coords.map(ring => ring.map(toLatLng));
-  return coords.map(toLatLng);
-}
 
 function initMap() {
   if (mapInitialized) return;
   mapInitialized = true;
-
   const theme = document.documentElement.getAttribute('data-theme') || 'dark';
   const tileUrl = theme === 'dark'
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
     : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-
   leafletMap = L.map('map', { center: [20.5, 78.9], zoom: 5, zoomControl: true });
-  L.tileLayer(tileUrl, {
-    attribution: '© OpenStreetMap contributors © CARTO',
-    subdomains: 'abcd', maxZoom: 19
-  }).addTo(leafletMap);
-
-  forestLayer   = L.layerGroup().addTo(leafletMap);
-  hazardLayer   = L.layerGroup().addTo(leafletMap);
+  L.tileLayer(tileUrl, { attribution: '© OpenStreetMap contributors © CARTO', subdomains: 'abcd', maxZoom: 19 }).addTo(leafletMap);
+  forestLayer    = L.layerGroup().addTo(leafletMap);
+  hazardLayer    = L.layerGroup().addTo(leafletMap);
   powerlineLayer = L.layerGroup().addTo(leafletMap);
 }
 
@@ -571,7 +429,6 @@ function renderAll(powerlines, forests, hazards) {
   forestLayer.clearLayers();
   hazardLayer.clearLayers();
   allBounds = [];
-
   renderForests(forests);
   renderHazards(hazards);
   renderPowerlines(powerlines);
@@ -620,7 +477,7 @@ function renderHazards(hazards) {
       const layer = L.polygon(latlngs, { fillColor: colors.fill, fillOpacity: colors.opacity, color: colors.stroke, weight: 2, opacity: 0.9, dashArray: hazard.riskLevel === 'high' ? null : '6,4' });
       layer.bindPopup(`<div class="hazard-popup"><h4>⚠️ Hazard Zone</h4><div class="popup-risk ${hazard.riskLevel}">${hazard.riskLevel.toUpperCase()} RISK</div><div class="popup-row"><span>Powerline</span><span>${hazard.powerlineName || '—'}</span></div><div class="popup-row"><span>Forest</span><span>${hazard.forestName || '—'}</span></div><div class="popup-row"><span>Density</span><span style="text-transform:capitalize">${hazard.forestDensity || '—'}</span></div><div class="popup-row"><span>Distance</span><span>${hazard.distanceToForestM || '—'} m</span></div><div class="popup-row"><span>Area</span><span>${areaDisplay}</span></div></div>`);
       layer.on('mouseover', function() { this.setStyle({ fillOpacity: Math.min(colors.opacity + 0.18, 0.65), weight: 3 }); });
-      layer.on('mouseout', function() { this.setStyle({ fillOpacity: colors.opacity, weight: 2 }); });
+      layer.on('mouseout',  function() { this.setStyle({ fillOpacity: colors.opacity, weight: 2 }); });
       hazardLayer.addLayer(layer);
       latlngs[0].forEach(ll => allBounds.push(ll));
     });
@@ -651,7 +508,7 @@ function renderHazardTable(hazards) {
   if (table) table.style.display = 'table';
   if (noHazards) noHazards.classList.add('hidden');
   const order = { high: 0, medium: 1, low: 2 };
-  [...hazards].sort((a,b)=>(order[a.riskLevel]||0)-(order[b.riskLevel]||0)).forEach(h => {
+  [...hazards].sort((a,b) => (order[a.riskLevel]||0) - (order[b.riskLevel]||0)).forEach(h => {
     const areaM2 = h.areaM2 || 0;
     const areaDisplay = areaM2 > 10000 ? `${(areaM2/10000).toFixed(1)} ha` : `${areaM2.toLocaleString()} m²`;
     const row = document.createElement('tr');
@@ -666,7 +523,7 @@ function updateStatOverlay(hazards) {
   const low    = hazards.filter(h => h.riskLevel === 'low').length;
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   set('overlay-high', high); set('overlay-medium', medium); set('overlay-low', low);
-  set('stat-high', high); set('stat-medium', medium); set('stat-low', low);
+  set('stat-high', high);    set('stat-medium', medium);    set('stat-low', low);
 }
 
 // ─── SCROLL ANIMATIONS ───
@@ -691,11 +548,6 @@ function initScrollAnimations() {
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initScrollAnimations();
-
-  // Check for saved session
   const savedSession = localStorage.getItem('dss-session');
-  if (savedSession) {
-    sessionId = savedSession;
-    // Optionally auto-login: fetch profile and go to dashboard
-  }
+  if (savedSession) sessionId = savedSession;
 });

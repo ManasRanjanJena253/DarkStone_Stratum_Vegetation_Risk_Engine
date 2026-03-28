@@ -3,6 +3,7 @@ from datetime import date
 from typing import Optional
 
 
+
 class UserBase(BaseModel):
     email: EmailStr
     is_active: bool = True
@@ -10,6 +11,8 @@ class UserBase(BaseModel):
 
 class CreateUser(UserBase):
     password: str
+    company_name: Optional[str] = None
+    role: Optional[str] = None
 
 
 class EnrollUser(BaseModel):
@@ -80,6 +83,8 @@ class UserProfileResponse(BaseModel):
     model_config = {"from_attributes": True}
     user_id: str
     email: EmailStr
+    company_name: Optional[str]
+    role: Optional[str]
     organization_name: Optional[str]
     is_organization: Optional[bool]
     is_active: bool
