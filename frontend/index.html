@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Stone Stratum — Wildfire Risk Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Theme Toggle (global) -->
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+    <span id="themeIcon">☀️</span>
+    <span id="themeLabel">Light</span>
+  </button>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PAGE: HOME                                 -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="page active" id="page-home">
+    <div class="bg-grid"></div>
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+
+    <nav class="nav">
+      <div class="nav-brand" onclick="window.location.href='index.html'">
+        <span>🔥</span>
+        <span>Dark Stone Stratum</span>
+      </div>
+      <div class="nav-links">
+        <span class="nav-link" onclick="window.location.href='subscription.html'">Subscription</span>
+        <span class="nav-cta" onclick="window.location.href='auth.html'">Get Started →</span>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-badge"><span class="badge-dot"></span>B2B Geospatial Risk Intelligence</div>
+      <h1 class="hero-title">Powerlines Near Forests<br><span class="title-accent">Area Wildfire Waiting to Happen</span></h1>
+      <p class="hero-sub">Dark Stone Stratum monitors your transmission infrastructure in real time, detecting hazardous proximity zones before they become disasters. Enterprise-grade geospatial analysis, zero guesswork.</p>
+      <div class="hero-cta-group">
+        <button class="btn-primary" onclick="window.location.href='auth.html'">Start Monitoring →</button>
+        <a href="#how" class="btn-ghost">See How It Works</a>
+      </div>
+      <div class="stat-cards">
+        <div class="stat-card stat-card--high"><div class="stat-label">High Risk Zones</div><div class="stat-value">Detected in real-time</div><div class="stat-dot"></div></div>
+        <div class="stat-card stat-card--medium"><div class="stat-label">Buffer Analysis</div><div class="stat-value">300m – 1km radius</div><div class="stat-dot"></div></div>
+        <div class="stat-card stat-card--low"><div class="stat-label">Forest Density</div><div class="stat-value">Low / Med / High</div><div class="stat-dot"></div></div>
+      </div>
+    </section>
+
+    <section class="section-how" id="how">
+      <div class="section-label">HOW IT WORKS</div>
+      <h2 class="section-title">From Raw Infrastructure<br>to Actionable Risk</h2>
+      <div class="steps">
+        <div class="step"><div class="step-number">01</div><div class="step-icon">🗂️</div><h3>Upload Powerline Data</h3><p>Register your company and upload your transmission line GeoJSON data. We index it instantly.</p></div>
+        <div class="step-arrow">→</div>
+        <div class="step"><div class="step-number">02</div><div class="step-icon">🌲</div><h3>Overlay Forest Polygons</h3><p>Our database includes national forest polygons with density classifications across India.</p></div>
+        <div class="step-arrow">→</div>
+        <div class="step"><div class="step-number">03</div><div class="step-icon">📍</div><h3>Compute Hazard Zones</h3><p>Spatial analysis buffers your lines and intersects forest data. Risk levels assigned automatically.</p></div>
+        <div class="step-arrow">→</div>
+        <div class="step"><div class="step-number">04</div><div class="step-icon">🗺️</div><h3>Visualize on the Map</h3><p>Interactive Leaflet map shows powerlines, forest areas, and hazard zones at a glance.</p></div>
+      </div>
+    </section>
+
+    <section class="section-risk">
+      <div class="section-label" style="text-align:center">RISK CLASSIFICATION</div>
+      <h2 class="section-title" style="text-align:center">Understanding Hazard Levels</h2>
+      <div class="risk-grid">
+        <div class="risk-item risk-high"><span class="risk-badge">HIGH RISK</span><p>Powerlines within 300m of high-density forest. Immediate wildfire spread potential. Requires urgent mitigation.</p></div>
+        <div class="risk-item risk-medium"><span class="risk-badge">MEDIUM RISK</span><p>Powerlines within 600m of medium-density forest. Elevated wildfire risk under dry conditions. Plan maintenance.</p></div>
+        <div class="risk-item risk-low"><span class="risk-badge">LOW RISK</span><p>Powerlines within 1km of sparse forest. Monitor conditions. Low immediate threat but worth tracking.</p></div>
+      </div>
+    </section>
+
+    <section class="section-cta">
+      <h2>Ready to Protect Your Grid?</h2>
+      <p>Join energy companies using Dark Stone Stratum to prevent wildfire disasters.</p>
+      <button class="btn-primary" onclick="window.location.href='auth.html'">Get Started Free →</button>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-brand">🔥 Dark Stone Stratum</div>
+      <div class="footer-copy">© 2026 Dark Stone Stratum. Geospatial Risk Intelligence Platform.</div>
+    </footer>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

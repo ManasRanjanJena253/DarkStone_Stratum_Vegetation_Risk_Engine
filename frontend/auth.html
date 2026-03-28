@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Stone Stratum — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Theme Toggle (global) -->
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+    <span id="themeIcon">☀️</span>
+    <span id="themeLabel">Light</span>
+  </button>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PAGE: AUTH                                 -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="page active" id="page-auth">
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+    <span class="back-link" onclick="window.location.href='index.html'">← Back to Stratum</span>
+
+    <div class="auth-container">
+      <div class="auth-left">
+        <div class="auth-brand"><span>🔥</span><span>Dark Stone Stratum</span></div>
+        <h2 class="auth-headline">Geospatial<br>Risk Intelligence<br>for Energy Companies</h2>
+        <div class="auth-features">
+          <div class="auth-feature"><span>📡</span> Real-time powerline monitoring</div>
+          <div class="auth-feature"><span>🌲</span> Forest proximity analysis</div>
+          <div class="auth-feature"><span>⚠️</span> Automated hazard detection</div>
+          <div class="auth-feature"><span>🗺️</span> Interactive risk maps</div>
+        </div>
+      </div>
+
+      <div class="auth-right">
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">Sign In</button>
+          <button class="auth-tab" data-tab="signup" onclick="switchAuthTab('signup')">Create Account</button>
+        </div>
+
+        <div id="auth-alert" style="display:none"></div>
+
+        <!-- LOGIN FORM -->
+        <div class="tab-content" id="tab-login">
+          <h3 class="form-title">Welcome back</h3>
+          <p class="form-sub">Sign in to your Dark Stone Stratum account</p>
+          <div class="auth-form">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="login-email" placeholder="company@example.com">
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="login-password" placeholder="••••••••">
+            </div>
+            <button class="btn-primary btn-full" onclick="handleLogin()">Sign In →</button>
+          </div>
+
+          <!-- BYPASS MODE LOGIC - TEMP DEMO CODE - REMOVE LATER -->
+          <button class="demo-bypass-btn" onclick="bypassToDemo()">
+            ⚡ Demo Access — Skip Authentication
+          </button>
+          <div class="demo-label">DEV ONLY · REMOVE BEFORE PRODUCTION</div>
+          <!-- END BYPASS MODE LOGIC -->
+
+          <p class="form-switch">Don't have an account? <button class="link-btn" onclick="switchAuthTab('signup')">Create one →</button></p>
+        </div>
+
+        <!-- SIGNUP FORM -->
+        <div class="tab-content hidden" id="tab-signup">
+          <h3 class="form-title">Get started free</h3>
+          <p class="form-sub">Create your company account</p>
+          <div class="auth-form">
+            <div class="form-group">
+              <label>Company Name</label>
+              <input type="text" id="signup-company" placeholder="Pacific Power Co.">
+            </div>
+            <div class="form-group">
+              <label>Your Role</label>
+              <select id="signup-role">
+                <option value="">Select your role...</option>
+                <option>Grid Engineer</option>
+                <option>Risk Analyst</option>
+                <option>Operations Manager</option>
+                <option>Compliance Officer</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="signup-email" placeholder="admin@company.com">
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="signup-password" placeholder="Min. 6 characters">
+            </div>
+            <button class="btn-primary btn-full" onclick="handleSignup()">Create Account →</button>
+          </div>
+          <p class="form-switch">Already have an account? <button class="link-btn" onclick="switchAuthTab('login')">Sign in →</button></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // ─── AUTH PAGE: override showPage and bypassToDemo for multi-file navigation ───
+    function showPage(name) {
+      const pageMap = {
+        'home': 'index.html',
+        'dashboard': 'dashboard.html',
+        'auth': 'auth.html',
+        'subscription': 'subscription.html'
+      };
+      if (pageMap[name]) window.location.href = pageMap[name];
+    }
+
+    // BYPASS MODE LOGIC - TEMP DEMO CODE - REMOVE LATER
+    function bypassToDemo() {
+      localStorage.setItem('dss-demo-mode', 'true');
+      window.location.href = 'dashboard.html';
+    }
+    // END BYPASS MODE LOGIC
+  </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Stone Stratum — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- Theme Toggle (global) -->
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+    <span id="themeIcon">☀️</span>
+    <span id="themeLabel">Light</span>
+  </button>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- PAGE: DASHBOARD                            -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="page active" id="page-dashboard">
+    <div class="dashboard-page">
+      <aside class="sidebar">
+        <div class="sidebar-brand"><span>🔥</span><span class="brand-name">Stratum</span></div>
+        <div class="sidebar-company">
+          <div class="company-avatar" id="dash-avatar">D</div>
+          <div class="company-info">
+            <div class="company-name" id="dash-company">Demo Corp</div>
+            <div class="company-plan plan-Pro" id="dash-plan">Pro</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <button class="sidebar-link active" onclick="showDashSection('map')"><span>🗺️</span> Risk Map</button>
+          <button class="sidebar-link" onclick="refreshHazards()"><span>🔄</span> Recompute</button>
+          <button class="sidebar-link" onclick="window.location.href='subscription.html'"><span>💳</span> Subscription</button>
+        </nav>
+        <div class="sidebar-legend">
+          <div class="legend-title">RISK LEGEND</div>
+          <div class="legend-item"><div class="legend-dot legend-dot--power"></div><span>Powerlines</span></div>
+          <div class="legend-item"><div class="legend-dot legend-dot--forest"></div><span>Forest Areas</span></div>
+          <div class="legend-item"><div class="legend-dot legend-dot--high"></div><span>High Risk Zone</span></div>
+          <div class="legend-item"><div class="legend-dot legend-dot--medium"></div><span>Medium Risk Zone</span></div>
+          <div class="legend-item"><div class="legend-dot legend-dot--low"></div><span>Low Risk Zone</span></div>
+        </div>
+        <button class="sidebar-logout" onclick="handleLogout()">Sign Out</button>
+      </aside>
+
+      <main class="dashboard-main">
+        <!-- Demo banner -->
+        <!-- TEMP DEMO CODE - REMOVE LATER -->
+        <div class="demo-banner" id="demo-banner" style="display:none">
+          <span class="demo-banner-icon">🧪</span>
+          DEMO MODE ACTIVE — Displaying mock data. Real API integration available when authenticated.
+        </div>
+        <!-- END TEMP DEMO CODE -->
+
+        <header class="dash-header">
+          <div class="dash-header-left">
+            <h1 class="dash-title">Risk Dashboard</h1>
+            <div class="dash-subtitle" id="dash-subtitle">Real-time wildfire hazard analysis</div>
+          </div>
+          <div class="dash-header-right">
+            <div id="last-computed" class="last-computed">Last computed: Now</div>
+            <button class="btn-refresh" onclick="refreshHazards()">
+              <span id="refresh-icon">🔄</span> Refresh Analysis
+            </button>
+          </div>
+        </header>
+
+        <div class="stats-bar">
+          <div class="stat-tile"><div class="stat-tile-value" id="stat-powerlines">—</div><div class="stat-tile-label">Powerlines</div><div class="stat-tile-icon">⚡</div></div>
+          <div class="stat-tile"><div class="stat-tile-value" id="stat-forests">—</div><div class="stat-tile-label">Forest Areas</div><div class="stat-tile-icon">🌲</div></div>
+          <div class="stat-tile stat-tile--high"><div class="stat-tile-value" id="stat-high">—</div><div class="stat-tile-label">High Risk</div><div class="stat-tile-icon">🔴</div></div>
+          <div class="stat-tile stat-tile--medium"><div class="stat-tile-value" id="stat-medium">—</div><div class="stat-tile-label">Medium Risk</div><div class="stat-tile-icon">🟠</div></div>
+          <div class="stat-tile stat-tile--low"><div class="stat-tile-value" id="stat-low">—</div><div class="stat-tile-label">Low Risk</div><div class="stat-tile-icon">🟡</div></div>
+        </div>
+
+        <div class="map-container">
+          <div id="map"></div>
+          <div id="map-loading" class="map-loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Computing hazard zones…</div>
+          </div>
+          <div class="map-overlay-panel">
+            <div class="risk-summary-title">HAZARD SUMMARY</div>
+            <div class="risk-row"><div class="risk-pill risk-pill--high">HIGH</div><span id="overlay-high">0</span> zones</div>
+            <div class="risk-row"><div class="risk-pill risk-pill--medium">MED</div><span id="overlay-medium">0</span> zones</div>
+            <div class="risk-row"><div class="risk-pill risk-pill--low">LOW</div><span id="overlay-low">0</span> zones</div>
+          </div>
+        </div>
+
+        <div class="hazard-table-section">
+          <h2 class="section-heading">Detected Hazard Zones</h2>
+          <div class="table-wrap">
+            <table class="hazard-table" id="hazard-table">
+              <thead><tr>
+                <th>Risk Level</th><th>Powerline</th><th>Forest</th>
+                <th>Forest Density</th><th>Distance to Forest</th><th>Hazard Area</th>
+              </tr></thead>
+              <tbody id="hazard-tbody"></tbody>
+            </table>
+            <div id="no-hazards" class="no-hazards hidden">No hazard zones detected.</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script src="js/app.js"></script>
+  <script>
+    // ─── DASHBOARD PAGE: override navigation and boot logic ───
+    function showPage(name) {
+      const pageMap = {
+        'home': 'index.html',
+        'dashboard': 'dashboard.html',
+        'auth': 'auth.html',
+        'subscription': 'subscription.html'
+      };
+      if (pageMap[name]) window.location.href = pageMap[name];
+    }
+
+    function handleLogout() {
+      const sid = sessionId || localStorage.getItem('dss-session');
+      if (sid && !isDemoMode) {
+        fetch(`${API_BASE}/../../logout?session_id=${sid}`, { method: 'POST' }).catch(() => {});
+      }
+      currentUser = null;
+      sessionId = null;
+      isDemoMode = false;
+      localStorage.removeItem('dss-session');
+      localStorage.removeItem('dss-demo-mode');
+      window.location.href = 'index.html';
+    }
+
+    // ─── DASHBOARD BOOT ───
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+
+      // BYPASS MODE LOGIC - TEMP DEMO CODE - REMOVE LATER
+      const demoMode = localStorage.getItem('dss-demo-mode');
+      if (demoMode === 'true') {
+        isDemoMode = true;
+        document.getElementById('dash-avatar').textContent = 'D';
+        document.getElementById('dash-company').textContent = 'Demo Corporation';
+        document.getElementById('dash-plan').textContent = 'Pro';
+        document.getElementById('dash-plan').className = 'company-plan plan-Pro';
+        document.getElementById('dash-subtitle').textContent = 'Demo mode — Mock data loaded';
+        document.getElementById('demo-banner').style.display = 'flex';
+      }
+      // END BYPASS MODE LOGIC
+
+      const savedSession = localStorage.getItem('dss-session');
+      if (savedSession) {
+        sessionId = savedSession;
+      }
+
+      // Init map after a short delay to allow layout to settle
+      setTimeout(() => {
+        initMap();
+        if (isDemoMode) {
+          loadDemoData();
+        } else {
+          loadDashboardData();
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>
